@@ -1,0 +1,49 @@
+<div class="my-5 auth-box">
+  <h3 class="mb-3">Login to BOG TodoList</h3>
+  <form action="" method="post" class="col-4">
+    <div class="mb-3">
+      <label for="username" class="form-label">User name</label>
+      <input type="text" class="form-control" id="username" name="username" />
+    </div>
+    <div class="mb-3">
+      <label for="password" class="form-label">Password</label>
+      <div class="pass-box">
+        <input type="password" class="form-control" id="password" name="password" />
+        <ion-icon name="eye-outline" id="show"></ion-icon>
+        <ion-icon name="eye-off-outline" id="hide"></ion-icon>
+      </div>
+    </div>
+    <% if (req.session.messageLogIn) { %>
+      <li class="text-danger mb-3">
+        <%= req.session.messageLogIn %>
+      </li>
+      <% } %>
+        <div class="d-flex">
+          <div class="col-3">
+            <button type="submit" class="btn btn-primary">Login</button>
+          </div>
+          <div class="col-8 ms-5">
+            Do not have an account? <a href="/signup">Sign Up</a>
+          </div>
+        </div>
+  </form>
+</div>
+
+<script>
+  var input = document.getElementById("password")
+  var show = document.getElementById("show")
+  var hide = document.getElementById("hide")
+  input.addEventListener("focus", () => {
+    show.style.display = "block"
+  })
+  show.addEventListener("click", () => {
+    hide.style.display = "block"
+    show.style.display = "none"
+    input.type = "text"
+  })
+  hide.addEventListener("click", () => {
+    show.style.display = "block"
+    hide.style.display = "none"
+    input.type = "password"
+  });
+</script>

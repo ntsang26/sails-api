@@ -1,0 +1,33 @@
+<div class="my-5">
+  <div class="row">
+    <div class="col-8">
+      <h1 class="display-4">Welcome to BOG TodoList</h1>
+    </div>
+    <div class="col-4 text-end">
+      <div class="dropdown">
+        <a
+          class="btn btn-secondary dropdown-toggle"
+          href="#"
+          role="button"
+          id="dropdownMenuLink"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <% if(!req.session.User) { %> Sign in <% } else {%> Hello, <%=
+          req.session.User.username %> <% } %>
+        </a>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+          <% if(!req.session.User) { %>
+          <li><a class="dropdown-item" href="/login">Login</a></li>
+          <li><a class="dropdown-item" href="/signup">Sign Up</a></li>
+          <% } else { %>
+          <li><a class="dropdown-item" href="/logout">Logout</a></li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <p>This is a SailsJS app to managing To Do</p>
+  <a href="/todo/list" class="btn btn-light">View Todos</a>
+  <a href="/todo/add" class="btn btn-light">Add Todo</a>
+</div>

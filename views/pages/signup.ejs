@@ -1,0 +1,67 @@
+<div class="my-5 auth-box">
+  <h3 class="mb-3">Sign Up to BOG TodoList</h3>
+  <form action="" method="post" class="col-4">
+    <div class="mb-3">
+      <label for="username" class="form-label">User name</label>
+      <input type="text" class="form-control" id="username" name="username" />
+    </div>
+    <div class="mb-3">
+      <label for="email" class="form-label">Email</label>
+      <input type="text" class="form-control" id="email" name="email" />
+    </div>
+    <div class="mb-3">
+      <label for="password" class="form-label">Password</label>
+      <div class="pass-box">
+        <input type="password" class="form-control" id="password" name="password" />
+        <ion-icon name="eye-outline" id="show"></ion-icon>
+        <ion-icon name="eye-off-outline" id="hide"></ion-icon>
+      </div>
+    </div>
+    <div class="mb-3">
+      <label for="confirm_password" class="form-label">Confirm Password</label>
+      <div class="pass-box">
+        <input type="password" class="form-control" id="confirm_password" name="confirm_password" />
+        <ion-icon name="eye-outline" id="show"></ion-icon>
+        <ion-icon name="eye-off-outline" id="hide"></ion-icon>
+      </div>
+    </div>
+    <% if (req.session.messageSignUp) { %>
+      <li class="text-danger mb-3">
+        <%= req.session.messageSignUp %>
+      </li>
+      <% } %>
+        <div class="d-flex">
+          <div class="col-3">
+            <button type="submit" class="btn btn-primary">Sign Up</button>
+          </div>
+          <div class="col-8 ms-5">
+            Do you already have an account? <a href="/login">Log in</a>
+          </div>
+        </div>
+  </form>
+</div>
+
+<script>
+  var input = document.getElementById("password")
+  var input_confirm = document.getElementById("confirm_password")
+  var show = document.getElementById("show")
+  var hide = document.getElementById("hide")
+
+  input.addEventListener("focus", () => {
+    show.style.display = "block"
+  })
+
+  show.addEventListener("click", () => {
+    hide.style.display = "block"
+    show.style.display = "none"
+    input.type = "text"
+    input_confirm.type = "text"
+  })
+
+  hide.addEventListener("click", () => {
+    show.style.display = "block"
+    hide.style.display = "none"
+    input.type = "password"
+    input_confirm.type = "password"
+  });
+</script>

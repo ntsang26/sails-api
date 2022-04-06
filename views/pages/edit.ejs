@@ -1,0 +1,27 @@
+<div class="my-4">
+  <h1>Add Todo</h1>
+  <form method="post" action="">
+    <input type="hidden" value="<%= toDo.id %>" />
+    <div class="mb-3">
+      <label for="work" class="form-label">Work</label>
+      <input
+        type="text"
+        class="form-control"
+        id="work"
+        name="work"
+        value="<%= toDo.work %>"
+      />
+    </div>
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <input
+        type="text"
+        class="form-control"
+        id="description"
+        name="description"
+        value="<%= toDo.description %>"
+      />
+    </div>
+    <button type="submit" class="btn btn-primary">Add Todo</button>
+  </form>
+</div>
