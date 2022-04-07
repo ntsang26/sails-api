@@ -20,9 +20,6 @@ module.exports = {
       required: true,
       unique: true,
     },
-    emailToken: {
-      type: 'string',
-    },
     deviceToken: {
       type: 'string',
     },

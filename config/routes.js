@@ -29,7 +29,9 @@ module.exports.routes = {
   "post /signup": { action: "User/postSignUp" },
   "post /logout": { action: "User/logout"},
   "post /refreshToken": { action: "User/refreshToken" },
-  "post /user/verifyOTP": { action: "User/verifyOTP"},
+  "post /user/verify-otp": { action: "User/verifyOTP"},
+  "post /user/verify-otp-device": { action: "User/verifyOTPDevice"},
+  "post /user/refresh-verify-otp": { action: "User/refreshVerifyOTP"},
   
   "post /todo/list": { action: "Todo/list" }, // get list todo
   "post /todo/add": { action: "Todo/storeAdd" }, // add todo

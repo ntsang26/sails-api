@@ -11,7 +11,7 @@ const moment = require('moment')
 const DeviceDetector = require('device-detector-js')
 const sendMail = require('../utils/sendMail')
 const bcrypt = require('bcrypt')
-const { sendOTPVetification } = require('../utils/otpVerify')
+const { sendOTPVetification, sendOTPVetificationDevice } = require('../utils/otpVerify')
 
 module.exports = {
     postLogin: async (req, res) => {
@@ -29,22 +29,8 @@ module.exports = {
                         device: device.device.type
                     })
                     if (!userDevice) {
-                        let options = {
-                            from: 'sangnt@jitsinnovationlabs.com',
-                            to: user.email,
-                            subject: 'BOG App - Xác Minh Thiết Bị',
-                            html: `
-                                <h2>Xin chào ${user.username}, Có vẻ như đây là lần đầu tiên bạn đăng nhập bằng thiết bị này</h2>
-                                <h3>Vui lòng xác minh thiết bị của bạn để tiếp tục...</h3>
-                                <a href="http://${req.headers.host}/user/verify-device?token=${user.deviceToken}">Xác minh thiết bị</a>
-                                `
-                        }
-                        sendMail(options)
-
-                        await Device.create({
-                            device: device.device.type,
-                            user_id: user.id
-                        })
+                        // send mail
+                        sendOTPVetificationDevice(user, res)
                     } else {
                         const accessToken = getToken(128)
                         // const refreshToken = getToken()
@@ -90,7 +76,7 @@ module.exports = {
                     user.password = hashPassword
 
                     const createdUser = await User.create(user).fetch()
-                    sendOTPVetification(createdUser, res)
+                    sendOTPVetification({ user_id: createdUser.id, email: createdUser.email }, res)
                 } else {
                     req.session.messageSignUp = "Mật khẩu không trùng khớp !!!"
                     res.view("pages/signup")
@@ -118,31 +104,95 @@ module.exports = {
                     const { expireAt } = UserOTPRecords[0]
                     const hashedOTP = UserOTPRecords[0].otp
 
-                    if(expireAt < moment().format()) {
-                        await UserOtp.destroy({user_id: user_id})
+                    if (expireAt < moment().format()) {
+                        await UserOtp.destroy({ user_id: user_id })
                         console.log('Mã OTP đã hết hiệu lực. Vui lòng yêu cầu lại.')
+                    } else {
+                        const validOTP = await bcrypt.compare(otp, hashedOTP)
+
+                        if (!validOTP) {
+                            console.log('Mã không đúng. Vui lòng nhập lại.')
+                        } else {
+                            await User.updateOne({ id: user_id }).set({ isVerified: true })
+                            await UserOtp.destroy({ user_id: user_id })
+                            res.json({
+                                status: "VERIFIED",
+                                message: "User email verified successfully!"
+                            })
+                        }
                     }
                 }
             }
         } catch (error) {
-            console.log(error)
+            res.json({
+                status: "FAILED",
+                message: error.message
+            })
         }
     },
 
-    verifyUser: async (req, res) => {
+    verifyOTPDevice: async (req, res) => {
         try {
-            const token = req.query.token
-            const user = await User.findOne({ emailToken: token })
-            if (user) {
-                await User.update({ emailToken: token }).set({ emailToken: '' })
-                await User.update({ isVerified: false }).set({ isVerified: true })
-                res.redirect('/login')
+            let { user_id, otp } = req.body
+            if (!user_id || !otp) {
+                console.log('Empty otp')
             } else {
-                res.redirect('/signup')
-                console.log('Email is not verified')
+                const UserOTPRecords = await UserOtp.find({ user_id: user_id })
+                if (UserOTPRecords.length <= 0) {
+                    console.log('Tài khoản không tồn tại hoặc đã được xác minh')
+                } else {
+                    const { expireAt } = UserOTPRecords[0]
+                    const hashedOTP = UserOTPRecords[0].otp
+
+                    if (expireAt < moment().format()) {
+                        await UserOtp.destroy({ user_id: user_id })
+                        console.log('Mã OTP đã hết hiệu lực. Vui lòng yêu cầu lại.')
+                    } else {
+                        const validOTP = await bcrypt.compare(otp, hashedOTP)
+
+                        if (!validOTP) {
+                            console.log('Mã không đúng. Vui lòng nhập lại.')
+                        } else {
+                            const deviceDetector = new DeviceDetector()
+                            const device = deviceDetector.parse(navigator.userAgent)
+
+                            await UserOtp.destroy({ user_id: user_id })
+                            await Device.create({
+                                device: device.device.type,
+                                user_id: user_id
+                            })
+                            
+                            res.json({
+                                status: "VERIFIED",
+                                message: "User device verified successfully!"
+                            })
+                        }
+                    }
+                }
             }
         } catch (error) {
-            console.log(error)
+            res.json({
+                status: "FAILED",
+                message: error.message
+            })
+        }
+    },
+
+    refreshVerifyOTP: async (req, res) => {
+        try {
+            let { user_id, email } = req.body
+
+            if (!user_id || !email) {
+                console.log("Không tìm thấy tài khoản")
+            } else {
+                await UserOtp.destroy({ user_id: user_id })
+                sendOTPVetification({ user_id, email }, res)
+            }
+        } catch (error) {
+            res.json({
+                status: "FAILED",
+                message: error.message
+            })
         }
     },
 

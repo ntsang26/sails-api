@@ -5,18 +5,54 @@ const moment = require('moment')
 require('dotenv').config()
 
 module.exports = {
-    sendOTPVetification: async (user, res) => {
+    sendOTPVetification: async ({user_id, email}, res) => {
+        try {
+            const otp = `${Math.floor(1000 + Math.random() * 9000)}`
+
+            let options = {
+                from: process.env.AUTHOR_EMAIL,
+                to: email,
+                subject: 'BOG App - Xác Minh Tài Khoản',
+                html: `
+                    <h2>Xin chào ${email}, Cảm ơn bạn đã đăng kí tài khoản tại website của chúng tôi !</h2>
+                    <h3>Vui lòng Xác Minh tài khoản của bạn để tiếp tục...</h3>
+                    <p>Mã OTP: <b>${otp}</b></p>
+                    <p>Mã OTP có hiệu lực trong 5 phút.</p>
+                    `
+            }
+            const hashedOTP = await bcrypt.hash(otp, 10)
+            await UserOtp.create({
+                user_id: user_id,
+                otp: hashedOTP,
+                expireAt: moment().add(5, 'm').format()
+            })
+
+            sendMail(options)
+
+            res.json({
+                status: 'PENDING',
+                message: 'Verification Email OTP Sent',
+                data: {
+                    user_id: user_id,
+                    email: email
+                }
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    },
+    sendOTPVetificationDevice: async (user,res) => {
         try {
             const otp = `${Math.floor(1000 + Math.random() * 9000)}`
 
             let options = {
                 from: process.env.AUTHOR_EMAIL,
                 to: user.email,
-                subject: 'BOG App - Xác Minh Tài Khoản',
+                subject: 'BOG App - Xác Minh Thiết Bị',
                 html: `
-                    <h2>Xin chào ${user.username}, Cảm ơn bạn đã đăng kí tài khoản tại website của chúng tôi !</h2>
-                    <h3>Vui lòng Xác Minh tài khoản của bạn để tiếp tục...</h3>
-                    <p>Mã OTP: <h3>${otp}</h3></p>
+                    <h2>Xin chào ${user.email}, bạn đã đăng nhập bằng thiết bị mới!</h2>
+                    <h3>Vui lòng xác minh thiết bị của bạn của bạn để tiếp tục...</h3>
+                    <p>Mã OTP: <b>${otp}</b></p>
                     <p>Mã OTP có hiệu lực trong 5 phút.</p>
                     `
             }
