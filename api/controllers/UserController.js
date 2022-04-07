@@ -76,7 +76,7 @@ module.exports = {
                     user.password = hashPassword
 
                     const createdUser = await User.create(user).fetch()
-                    sendOTPVetification({ user_id: createdUser.id, email: createdUser.email }, res)
+                    sendOTPVetification(createdUser, res)
                 } else {
                     req.session.messageSignUp = "Mật khẩu không trùng khớp !!!"
                     res.view("pages/signup")
@@ -161,7 +161,7 @@ module.exports = {
                                 device: device.device.type,
                                 user_id: user_id
                             })
-                            
+
                             res.json({
                                 status: "VERIFIED",
                                 message: "User device verified successfully!"

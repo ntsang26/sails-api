@@ -5,16 +5,16 @@ const moment = require('moment')
 require('dotenv').config()
 
 module.exports = {
-    sendOTPVetification: async ({user_id, email}, res) => {
+    sendOTPVetification: async (user, res) => {
         try {
             const otp = `${Math.floor(1000 + Math.random() * 9000)}`
 
             let options = {
                 from: process.env.AUTHOR_EMAIL,
-                to: email,
+                to: user.email,
                 subject: 'BOG App - Xác Minh Tài Khoản',
                 html: `
-                    <h2>Xin chào ${email}, Cảm ơn bạn đã đăng kí tài khoản tại website của chúng tôi !</h2>
+                    <h2>Xin chào ${user.email}, Cảm ơn bạn đã đăng kí tài khoản tại website của chúng tôi !</h2>
                     <h3>Vui lòng Xác Minh tài khoản của bạn để tiếp tục...</h3>
                     <p>Mã OTP: <b>${otp}</b></p>
                     <p>Mã OTP có hiệu lực trong 5 phút.</p>
@@ -22,7 +22,7 @@ module.exports = {
             }
             const hashedOTP = await bcrypt.hash(otp, 10)
             await UserOtp.create({
-                user_id: user_id,
+                user_id: user.id,
                 otp: hashedOTP,
                 expireAt: moment().add(5, 'm').format()
             })
@@ -33,7 +33,7 @@ module.exports = {
                 status: 'PENDING',
                 message: 'Verification Email OTP Sent',
                 data: {
-                    user_id: user_id,
+                    user_id: user.id,
                     email: email
                 }
             })
