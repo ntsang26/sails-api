@@ -12,8 +12,10 @@ const DeviceDetector = require('device-detector-js')
 const sendMail = require('../utils/sendMail')
 const bcrypt = require('bcrypt')
 const { sendOTPVetification, sendOTPVetificationDevice } = require('../utils/otpVerify')
+const platform = require('platform')
 
 module.exports = {
+
     postLogin: async (req, res) => {
         try {
             const data = req.body
@@ -21,16 +23,14 @@ module.exports = {
             if (user) {
                 const match = await bcrypt.compare(data.password, user.password)
                 if (match) {
-                    const deviceDetector = new DeviceDetector()
-                    const device = deviceDetector.parse(navigator.userAgent)
-
+                    const device = data.device
                     const userDevice = await Device.findOne({
                         user_id: user.id,
-                        device: device.device.type
+                        device: device
                     })
                     if (!userDevice) {
                         // send mail
-                        sendOTPVetificationDevice(user, res)
+                        sendOTPVetificationDevice({user, device}, res)
                     } else {
                         const accessToken = getToken(128)
                         // const refreshToken = getToken()
@@ -133,7 +133,7 @@ module.exports = {
 
     verifyOTPDevice: async (req, res) => {
         try {
-            let { user_id, otp } = req.body
+            let { user_id, otp, device } = req.body
             if (!user_id || !otp) {
                 console.log('Empty otp')
             } else {
@@ -153,12 +153,10 @@ module.exports = {
                         if (!validOTP) {
                             console.log('Mã không đúng. Vui lòng nhập lại.')
                         } else {
-                            const deviceDetector = new DeviceDetector()
-                            const device = deviceDetector.parse(navigator.userAgent)
 
                             await UserOtp.destroy({ user_id: user_id })
                             await Device.create({
-                                device: device.device.type,
+                                device: device,
                                 user_id: user_id
                             })
 

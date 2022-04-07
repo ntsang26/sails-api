@@ -34,14 +34,14 @@ module.exports = {
                 message: 'Verification Email OTP Sent',
                 data: {
                     user_id: user.id,
-                    email: email
+                    email: user.email
                 }
             })
         } catch (error) {
             console.log(error)
         }
     },
-    sendOTPVetificationDevice: async (user,res) => {
+    sendOTPVetificationDevice: async ({ user, device }, res) => {
         try {
             const otp = `${Math.floor(1000 + Math.random() * 9000)}`
 
@@ -70,7 +70,8 @@ module.exports = {
                 message: 'Verification Email OTP Sent',
                 data: {
                     user_id: user.id,
-                    email: user.email
+                    email: user.email,
+                    device: device
                 }
             })
         } catch (error) {
