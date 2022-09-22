@@ -1,4 +1,4 @@
-# crud-app
+# API - APP
 
 a [Sails v1](https://sailsjs.com) application
 
